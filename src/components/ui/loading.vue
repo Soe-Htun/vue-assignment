@@ -41,7 +41,7 @@ defineProps({
   width: 50px;
   height: 50px;
   border: 4px solid rgba(141, 198, 63, 0.2);
-  border-top: 4px solid #8DC63F;
+  border-top: 4px solid var(--primary-color);
   border-radius: 50%;
   animation: spin 1s linear infinite;
 }
