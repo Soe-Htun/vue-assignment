@@ -52,7 +52,7 @@
 
           <!-- Ribbon -->
           <div v-if="game.categories.includes('new')" class="ribbon new"><span>NEW</span></div>
-          <div v-else-if="game.categories.includes('top')" class="ribbon top"><span>TOP</span></div>
+          <div v-if="game.categories.includes('top')" class="ribbon top"><span>TOP</span></div>
         </div>
       </div>
     </div>
@@ -344,7 +344,7 @@ const filteredGames = computed(() => {
 }
 
 .ribbon span::before {
-  left: 0px;
+  left: -0px;
   border-left: 3px solid;
   border-right: 3px solid transparent;
 }
@@ -357,7 +357,7 @@ const filteredGames = computed(() => {
 
 .ribbon.new span {
   background: var(--success);
-  background: linear-gradient(var(--success) 0%, var(--success) 100%);
+  background: linear-gradient(#5a911f 0%, var(--success) 100%);
 }
 
 .ribbon.new span::before {
