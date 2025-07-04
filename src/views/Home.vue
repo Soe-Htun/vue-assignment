@@ -476,7 +476,7 @@ const filteredGames = computed<GameData[]>(() => {
 .menu-icon {
   margin-top: 7px;
   margin-left: 15px;
-}
+} 
 .backdrop {
   position: fixed;
   top: 0;
