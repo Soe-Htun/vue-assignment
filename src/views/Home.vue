@@ -1,17 +1,38 @@
 <template>
-  <div class="casino-app">
-    <div class="category-bar">
-      <div class="category-container">
-        <div
-          v-for="category in categories"
-          :key="category"
-          :class="{ 'category-item': true, active: activeCategory === category }"
-          @click="activeCategory = category"
-        >
-          {{ category }}
+  <div class="casino-app" :class="{'blur' : isMenuOpen}">
+    <div class="category-header">
+      <div class="let-menu" >
+        <icons
+          v-if="!isDesktop && !isMenuOpen"
+          @click="isMenuOpen = !isMenuOpen"
+          name="menu"
+          class="menu-icon"
+        />
+
+        <div class="category-bar" v-show="isDesktop || isMenuOpen">
+
+          <icons v-if="!isDesktop"
+            name="caret-left" @click="isMenuOpen= false" class="menu-icon" />
+          <div class="category-container">
+            <div
+              v-for="category in categories"
+              :key="category"
+              :class="{ 'category-item': true, active: activeCategory === category }"
+              @click="((activeCategory = category), (isMenuOpen = false))"
+            >
+              {{ category }}
+            </div>
+          </div>
         </div>
       </div>
     </div>
+
+    <!-- Backdrop for mobile -->
+     <div
+      v-if="!isDesktop && isMenuOpen"
+      class="backdrop"
+      @click="isMenuOpen = false"
+    ></div>
 
     <div class="game-container">
       <LoadingSpinner v-if="loading" text="Loading games..." />
@@ -69,6 +90,17 @@ import { ref, onMounted, onUnmounted, computed } from 'vue'
 import LoadingSpinner from '../components/ui/loading.vue'
 import { API_BASE_URL } from '../constants'
 import type { GameCategoryList, Jackpot, GameData } from '@/@types/home'
+import icons from '@/components/ui/icons.vue'
+
+const isMenuOpen = ref<boolean>(false)
+const isDesktop = ref<boolean>(true)
+
+const handleResize = () => {
+  isDesktop.value = window.innerWidth > 768
+  if (isDesktop.value) {
+    isMenuOpen.value = false
+  }
+}
 
 const categories = ref<GameCategoryList[]>([
   'Top Games',
@@ -96,8 +128,8 @@ const formatJackpot = (amount: number | null | undefined): string => {
 }
 
 const handleImageError = (event: Event) => {
-  const target = event.target as HTMLImageElement;
-  target.src = 'https://via.placeholder.com/300x300?text=Game+Image';
+  const target = event.target as HTMLImageElement
+  target.src = 'https://via.placeholder.com/300x300?text=Game+Image'
 }
 
 const fetchGames = async () => {
@@ -128,12 +160,19 @@ const fetchJackpots = async () => {
 }
 
 onMounted(() => {
+  handleResize()
+  window.addEventListener('resize', handleResize)
+
   fetchGames()
   fetchJackpots()
   const jackpotInterval = setInterval(fetchJackpots, 5000)
 
   // Cleanup interval on component unmount
   onUnmounted(() => clearInterval(jackpotInterval))
+})
+
+onUnmounted(() => {
+  window.removeEventListener('resize', handleResize)
 })
 
 const filteredGames = computed<GameData[]>(() => {
@@ -217,11 +256,17 @@ const filteredGames = computed<GameData[]>(() => {
   margin: 0 auto;
   padding: 50px 100px;
   opacity: 0; /* Start invisible */
-  animation: cardEntry 0.5s ease-out forwards; 
+  animation: cardEntry 0.5s ease-out forwards;
 }
 @keyframes cardEntry {
-  from { opacity: 0; transform: scale(0.95); }
-  to { opacity: 1; transform: scale(1); }
+  from {
+    opacity: 0;
+    transform: scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
 }
 
 .game-grid {
@@ -417,5 +462,53 @@ const filteredGames = computed<GameData[]>(() => {
 .category-container::-webkit-scrollbar-thumb {
   background: var(--primary-color);
   border-radius: 3px;
+}
+
+.category-header {
+  display: flex;
+  align-items: center;
+  background: var(--bg-primary);
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  height: 58px;
+}
+.menu-icon {
+  margin-top: 7px;
+  margin-left: 15px;
+}
+.backdrop {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background: rgba(0, 0, 0, 0.5);
+  z-index: 90;
+}
+.blur .game-container {
+  filter: blur(2px);
+  pointer-events: none;
+}
+@media (max-width: 768px) {
+  .category-bar {
+    flex: 1;
+    width: 100%;
+    height: 100vh;
+  }
+  .category-header {
+    align-items: start;
+  }
+  .let-menu {
+    width: 200px;
+  }
+
+  .category-container {
+    flex-direction: column;
+  }
+
+  .category-item {
+    padding: 12px 20px;
+  }
 }
 </style>
