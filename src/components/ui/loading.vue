@@ -7,13 +7,14 @@
   </div>
 </template>
 
-<script setup>
-defineProps({
-  text: {
-    type: String,
-    default: "Loading games..."
-  }
-});
+<script setup lang="ts">
+interface Props {
+  text?: string
+}
+
+withDefaults(defineProps<Props>(), {
+  text: 'Loading games...' 
+})
 </script>
 
 <style scoped>
@@ -26,8 +27,9 @@ defineProps({
   display: flex;
   align-items: center;
   justify-content: center;
-  background-color: rgba(26, 26, 46, 0.8); /* Semi-transparent dark background */
+  /* background-color: rgba(26, 26, 46, 0.8); */
   z-index: 1000;
+  height: calc(100vh - 58px);
 }
 
 .loading-content {
@@ -47,7 +49,7 @@ defineProps({
 }
 
 .loading-text {
-  color: #ffffff;
+  color: #000;
   font-size: 1.1rem;
   font-weight: 500;
 }

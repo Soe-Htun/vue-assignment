@@ -38,7 +38,7 @@
 
             <div v-if="hoveredGame === game.id" class="game-overlay">
               <button class="play-button">
-                PLAY NOW
+                PLAY
                 <span v-if="jackpots[game.id]" class="jackpot-badge">
                   £{{ formatJackpot(jackpots[game.id]) }}
                 </span>
@@ -50,20 +50,27 @@
             <h3 class="game-title">{{ game.name }}</h3>
           </div> -->
 
-          <!-- Ribbon -->
           <div v-if="game.categories.includes('new')" class="ribbon new"><span>NEW</span></div>
-          <div v-if="game.categories.includes('top')" class="ribbon top"><span>TOP</span></div>
+          <!-- Hide Top in New Games -->
+          <div
+            v-if="game.categories.includes('top') && activeCategory !== 'New Games'"
+            class="ribbon top"
+          >
+            <span>TOP</span>
+          </div>
         </div>
       </div>
     </div>
   </div>
 </template>
 
-<script setup>
+<script setup lang="ts">
 import { ref, onMounted, onUnmounted, computed } from 'vue'
 import LoadingSpinner from '../components/ui/loading.vue'
+import { API_BASE_URL } from '../constants'
+import type { GameCategoryList, Jackpot, GameData } from '@/@types/home'
 
-const categories = ref([
+const categories = ref<GameCategoryList[]>([
   'Top Games',
   'New Games',
   'Slots',
@@ -76,25 +83,27 @@ const categories = ref([
   'Other',
 ])
 
-const activeCategory = ref('Top Games')
-const games = ref([])
-const jackpots = ref({})
-const hoveredGame = ref(null)
+const activeCategory = ref<GameCategoryList>('Top Games')
+const games = ref<GameData[]>([])
+const jackpots = ref<Record<string, number>>({})
+const hoveredGame = ref<string | null>(null)
 const loading = ref(true)
-const error = ref(null)
+const error = ref<string | null>(null)
 
-const formatJackpot = (amount) => {
+// format amount with comma like 1,000
+const formatJackpot = (amount: number | null | undefined): string => {
   return amount?.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ',') || '0'
 }
 
-const handleImageError = (event) => {
-  event.target.src = 'https://via.placeholder.com/300x300?text=Game+Image'
+const handleImageError = (event: Event) => {
+  const target = event.target as HTMLImageElement;
+  target.src = 'https://via.placeholder.com/300x300?text=Game+Image';
 }
 
 const fetchGames = async () => {
   try {
     loading.value = true
-    const res = await fetch('http://stage.whgstage.com/front-end-test/games.php')
+    const res = await fetch(`${API_BASE_URL}/games.php`)
     const data = await res.json()
     games.value = Object.values(data)
   } catch (err) {
@@ -107,10 +116,10 @@ const fetchGames = async () => {
 
 const fetchJackpots = async () => {
   try {
-    const res = await fetch('http://stage.whgstage.com/front-end-test/jackpots.php')
+    const res = await fetch(`${API_BASE_URL}/jackpots.php`)
     const data = await res.json()
     jackpots.value = {}
-    data.forEach((j) => {
+    data.forEach((j: Jackpot) => {
       jackpots.value[j.game] = j.amount
     })
   } catch (err) {
@@ -127,7 +136,7 @@ onMounted(() => {
   onUnmounted(() => clearInterval(jackpotInterval))
 })
 
-const filteredGames = computed(() => {
+const filteredGames = computed<GameData[]>(() => {
   if (!games.value.length) return []
 
   switch (activeCategory.value) {
@@ -186,7 +195,6 @@ const filteredGames = computed(() => {
   padding: 16px 24px;
   white-space: nowrap;
   cursor: pointer;
-  /* background: #3a3a5a; */
   color: var(--bg-secondary);
   font-weight: 600;
   transition: all 0.3s ease;
@@ -208,6 +216,12 @@ const filteredGames = computed(() => {
   width: 100%;
   margin: 0 auto;
   padding: 50px 100px;
+  opacity: 0; /* Start invisible */
+  animation: cardEntry 0.5s ease-out forwards; 
+}
+@keyframes cardEntry {
+  from { opacity: 0; transform: scale(0.95); }
+  to { opacity: 1; transform: scale(1); }
 }
 
 .game-grid {
@@ -224,10 +238,12 @@ const filteredGames = computed(() => {
   transition:
     transform 0.3s ease,
     box-shadow 0.3s ease;
+  scale: 0.3s ease;
+  transform-origin: center;
 }
 
 .game-card:hover {
-  transform: translateY(-5px);
+  transform: scale(1.05);
   box-shadow: 0 10px 20px rgba(0, 0, 0, 0.3);
 }
 
@@ -244,8 +260,6 @@ const filteredGames = computed(() => {
   left: 0;
   width: 100%;
   height: 100%;
-  /* object-fit: cover;
-  object-position: center; */
   transition: transform 0.3s ease;
 }
 
