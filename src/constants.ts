@@ -1,1 +1,1 @@
-export const API_BASE_URL = 'http://stage.whgstage.com/front-end-test';
+export const API_BASE_URL = 'https://stage.whgstage.com/front-end-test';
