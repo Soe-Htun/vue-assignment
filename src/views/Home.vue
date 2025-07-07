@@ -60,10 +60,10 @@
             <div v-if="hoveredGame === game.id" class="game-overlay">
               <button class="play-button">
                 PLAY
-                <span v-if="jackpots[game.id]" class="jackpot-badge">
-                  £{{ formatJackpot(jackpots[game.id]) }}
-                </span>
               </button>
+              <span v-if="jackpots[game.id]" class="jackpot-badge">
+                  £{{ formatJackpot(jackpots[game.id]) }}
+              </span>
             </div>
           </div>
 
@@ -318,8 +318,9 @@ const filteredGames = computed<GameData[]>(() => {
   left: 0;
   width: 100%;
   height: 100%;
-  background: rgba(0, 0, 0, 0.7);
+  background: rgba(0, 0, 0, 0.8);
   display: flex;
+  flex-direction: column;
   justify-content: center;
   align-items: center;
   opacity: 0;
@@ -350,11 +351,16 @@ const filteredGames = computed<GameData[]>(() => {
 }
 
 .jackpot-badge {
-  background: rgba(0, 0, 0, 0.5);
+  /* background: rgba(0, 0, 0, 0.5); */
   padding: 3px 10px;
   border-radius: 10px;
-  font-size: 12px;
-  color: #f8d35b;
+  font-size: 14px;
+  /* color: #f8d35b; */
+  color: #fff;
+  position: fixed;
+  bottom: 0;
+  margin-bottom: 40px;
+  font-weight: bold;
 }
 
 .game-info {
